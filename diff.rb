@@ -83,9 +83,13 @@ def seal_block_in_turn(id, par)
 end
 
 def can_seal?(id, par)
-#  !par["signers"].key?(id) | ((par["number"] - par["signers"][id]) >= (@PEER_COUNT / 2 + 1))
-  true
+  if !par["signers"].key?(id)
+    return true
+  end
+
+  (par["number"] - par["signers"][id]) >= (@PEER_COUNT / 2 + 1)
 end
+
 
 # use this genesis to run the chains
 def seal_genesis
