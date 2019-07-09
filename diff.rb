@@ -179,26 +179,11 @@ def mine_chain(gen, peers)
       end
     end
 
-
     # check: is the network stuck?
-    _stuck = false
+    _stuck = true
     peers.each do |p|
-      peers.each do |q|
-
-      	# condition 1: same difficulty
-        if p[0]['best']['difficulty'] === q[0]['best']['difficulty']
-
-        	# condition 2: different hash
-          if p[0]['best']['hash'].to_i(16) != q[0]['best']['hash'].to_i(16)
-
-          	# condition 3: same diff as best in-turn block
-            if p[0]['best']['difficulty'] === _diff
-
-            	# network is unable to reorg if all conditions are met
-              _stuck = true
-            end
-          end
-        end
+      if can_seal?(p[0]['id'], p[0]['best'])
+        _stuck = false
       end
     end
 
