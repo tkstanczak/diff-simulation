@@ -58,7 +58,7 @@ def seal_block_out_of_turn(id, par)
     "number" => _num,
     "difficulty" => _diff,
     "hash" => _hash,
-    "parent" => par
+    "parent" => par["hash"]
   }
 end
 
@@ -78,7 +78,7 @@ def seal_block_in_turn(id, par)
     "number" => _num,
     "difficulty" => _diff,
     "hash" => _hash,
-    "parent" => par,
+    "parent" => par["hash"],
   }
 end
 
