@@ -42,11 +42,14 @@ def log(string)
 end
 
 # seal an out-of-turn block
-def seal_block_out_of_turn(num, diff, par)
+def seal_block_out_of_turn(id, signers, num, diff, par)
   _num = num + 1
   _diff = diff + @DIFF_NOTURN
   _hash = block_hash
+  _signers = signers
+  _signers[id] = _num
   block = {
+    "signers" => _signers,
     "number" => _num,
     "difficulty" => _diff,
     "hash" => _hash,
@@ -55,11 +58,14 @@ def seal_block_out_of_turn(num, diff, par)
 end
 
 # seal an in-turn block
-def seal_block_in_turn(num, diff, par)
+def seal_block_in_turn(id, signers, num, diff, par)
   _num = num + 1
   _diff = diff + @DIFF_INTURN
   _hash = block_hash
+  _signers = signers
+  _signers[id] = _num
   block = {
+    "signers" => _signers,
     "number" => _num,
     "difficulty" => _diff,
     "hash" => _hash,
@@ -70,6 +76,7 @@ end
 # use this genesis to run the chains
 def seal_genesis
   genesis = {
+      "signers" => {},
       "number" => 0,
       "difficulty" => 1337,
       "hash" => "d1f7f7cb18b4",
@@ -108,6 +115,8 @@ def mine_chain(gen, peers)
       # if node is in turn, seal in-turn block
       if _current === @PEER_INTURN
         _best = seal_block_in_turn(
+	    peer[0]['id'],
+	    peer[0]['best']["signers"],
             peer[0]['best']["number"],
             peer[0]['best']["difficulty"],
             peer[0]['best']["hash"]
@@ -119,6 +128,8 @@ def mine_chain(gen, peers)
       # if node is not in turn, seal out-of-turn block
       else
         _best = seal_block_out_of_turn(
+	    peer[0]['id'],
+	    peer[0]['best']["signers"],
             peer[0]['best']["number"],
             peer[0]['best']["difficulty"],
             peer[0]['best']["hash"]
