@@ -48,9 +48,9 @@ def seal_block_out_of_turn(id, par)
   end
 
   _num = par["number"] + 1
-  _diff = par["difficulty"] + @DIFF_NOTURN
-  _hash = block_hash
   _signers = par["signers"].clone
+  _diff = par["difficulty"] + (_signers.key?(id) ? (_num - _signers[id]) : 1)
+  _hash = block_hash
   _signers[id] = _num
 
   block = {
@@ -69,9 +69,9 @@ def seal_block_in_turn(id, par)
   end
 
   _num = par["number"] + 1
-  _diff = par["difficulty"] + @DIFF_INTURN
-  _hash = block_hash
   _signers = par["signers"].clone
+  _diff = par["difficulty"] + @PEER_COUNT + 1
+  _hash = block_hash
   _signers[id] = _num
   block = {
     "signers" => _signers,
