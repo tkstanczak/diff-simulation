@@ -42,12 +42,17 @@ def log(string)
 end
 
 # seal an out-of-turn block
-def seal_block_out_of_turn(id, signers, num, diff, par)
-  _num = num + 1
-  _diff = diff + @DIFF_NOTURN
+def seal_block_out_of_turn(id, par)
+  if !can_seal?(id, par)
+    return par
+  end
+
+  _num = par["number"] + 1
+  _diff = par["difficulty"] + @DIFF_NOTURN
   _hash = block_hash
-  _signers = signers
+  _signers = par["signers"].clone
   _signers[id] = _num
+
   block = {
     "signers" => _signers,
     "number" => _num,
@@ -58,19 +63,28 @@ def seal_block_out_of_turn(id, signers, num, diff, par)
 end
 
 # seal an in-turn block
-def seal_block_in_turn(id, signers, num, diff, par)
-  _num = num + 1
-  _diff = diff + @DIFF_INTURN
+def seal_block_in_turn(id, par)
+  if !can_seal?(id, par)
+    return par
+  end
+
+  _num = par["number"] + 1
+  _diff = par["difficulty"] + @DIFF_INTURN
   _hash = block_hash
-  _signers = signers
+  _signers = par["signers"].clone
   _signers[id] = _num
   block = {
     "signers" => _signers,
     "number" => _num,
     "difficulty" => _diff,
     "hash" => _hash,
-    "parent" => par
+    "parent" => par,
   }
+end
+
+def can_seal?(id, par)
+#  !par["signers"].key?(id) | ((par["number"] - par["signers"][id]) >= (@PEER_COUNT / 2 + 1))
+  true
 end
 
 # use this genesis to run the chains
@@ -116,10 +130,7 @@ def mine_chain(gen, peers)
       if _current === @PEER_INTURN
         _best = seal_block_in_turn(
 	    peer[0]['id'],
-	    peer[0]['best']["signers"],
-            peer[0]['best']["number"],
-            peer[0]['best']["difficulty"],
-            peer[0]['best']["hash"]
+	    peer[0]['best']
           )
         _diff = _best['difficulty']
         _num = _best['number']
@@ -129,10 +140,7 @@ def mine_chain(gen, peers)
       else
         _best = seal_block_out_of_turn(
 	    peer[0]['id'],
-	    peer[0]['best']["signers"],
-            peer[0]['best']["number"],
-            peer[0]['best']["difficulty"],
-            peer[0]['best']["hash"]
+	    peer[0]['best']
           )
         log "[SEAL] Peer #{peer[0]['id']} (head #{peer[0]['best']['hash']}) sealed NOTURN block #{_best['number']}, diff #{_best['difficulty']}, hash #{_best['hash']}, parent #{_best['parent']}".colorize(:light_blue)
       end
